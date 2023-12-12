@@ -1,24 +1,26 @@
+# tomcat_deploy.yml
 ---
-- hosts: all
-  become: yes
+- hosts: localhost
   tasks:
-  - name: Install Tomcat
-    apt:
-      name: tomcat9
-      state: present
-  - name: Set Tomcat heap size
-    lineinfile:
-      path: /usr/lib/jvm/java-11-openjdk-amd64/jre/lib/amd64/server/libjvm.so
-      line: "-Xmx{{ heap_size }}M"
-      state: present
-      backrefs: yes
-  - name: Deploy the war
-    shell:
-      command: cp sample.war /usr/local/tomcat/webapps/
-  - name: Restart Tomcat
-    service:
-      name: tomcat9
-      state: restarted
+    - name: Install Tomcat
+      apt:
+        name: tomcat9
+        state: present
 
-  vars:
-    heap_size: "{{ env == 'DEV' ? 256 : 512 }}"
+    - name: Deploy sample.war
+      copy:
+        src: /data/sample.war
+        dest: /var/lib/tomcat9/webapps/
+
+    - name: Configure Tomcat heap size
+      lineinfile:
+        path: /etc/default/tomcat9
+        regexp: '^(export CATALINA_OPTS=)'
+        line: 'export CATALINA_OPTS="$CATALINA_OPTS -Xmx{{ heap_size }}"'
+      vars:
+        heap_size: "{{ '256m' if env == 'DEV' else '512m' }}"
+
+    - name: Restart Tomcat
+      service:
+        name: tomcat9
+        state: restarted

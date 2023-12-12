@@ -1,10 +1,8 @@
+# tomcat_deploy.sh
 #!/bin/bash
 
-# Install Ansible
-apt install ansible
+# Build Docker image
+docker build -t tomcat-ansible-test .
 
-# Build the Docker container
-docker build -t tomcat-deploy .
-
-# Run the container
-docker run --privileged=true -it -v $PWD/deploy:/data tomcat-deploy
+# Run Docker container with privileged option
+docker run --privileged=true -v "$(pwd)/deploy:/data" tomcat-ansible-test /data/tomcat_test.sh $1
