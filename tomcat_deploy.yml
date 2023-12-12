@@ -9,7 +9,7 @@
 
     - name: Deploy sample.war
       copy:
-        src: /data/sample.war
+        src: sample.war
         dest: /var/lib/tomcat9/webapps/
 
     - name: Configure Tomcat heap size
