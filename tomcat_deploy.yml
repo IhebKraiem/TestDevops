@@ -1,0 +1,24 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+  - name: Install Tomcat
+    apt:
+      name: tomcat9
+      state: present
+  - name: Set Tomcat heap size
+    lineinfile:
+      path: /usr/lib/jvm/java-11-openjdk-amd64/jre/lib/amd64/server/libjvm.so
+      line: "-Xmx{{ heap_size }}M"
+      state: present
+      backrefs: yes
+  - name: Deploy the war
+    shell:
+      command: cp sample.war /usr/local/tomcat/webapps/
+  - name: Restart Tomcat
+    service:
+      name: tomcat9
+      state: restarted
+
+  vars:
+    heap_size: "{{ env == 'DEV' ? 256 : 512 }}"
